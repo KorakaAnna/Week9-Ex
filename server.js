@@ -28,3 +28,44 @@ app.post('/restaurants', (req, res) => {
   restaurants.push(newRestaurant);
   res.status(201).json(newRestaurant);
 });
+
+const mysql = require('mysql2');
+
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: '',  // Βάλτε τον δικό σας κωδικό!
+  database: 'restaurant_db'
+});
+
+connection.connect(err => {
+  if (err) {
+    console.error("Σφάλμα σύνδεσης στη MariaDB:", err);
+  } else {
+    console.log("Συνδέθηκε επιτυχώς στη MariaDB!");
+  }
+});
+
+app.get('/restaurants', (req, res) => {
+  connection.query('SELECT * FROM restaurants', (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json(results);
+  });
+});
+
+app.use(express.json());  // Middleware για να διαβάζουμε JSON
+
+app.post('/restaurants', (req, res) => {
+  const { name, location } = req.body;
+
+  connection.query('INSERT INTO restaurants (name, location) VALUES (?, ?)', 
+  [name, location], 
+  (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json({ id: result.insertId, name, location });
+  });
+});
