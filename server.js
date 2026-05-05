@@ -18,3 +18,13 @@ const restaurants = [
 app.get('/restaurants', (req, res) => {
   res.json(restaurants);
 });
+
+const bodyParser = require('body-parser');
+app.use(bodyParser.json());
+
+app.post('/restaurants', (req, res) => {
+  const newRestaurant = req.body;
+  newRestaurant.id = restaurants.length + 1;
+  restaurants.push(newRestaurant);
+  res.status(201).json(newRestaurant);
+});
